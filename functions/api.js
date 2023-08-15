@@ -15,11 +15,11 @@ router.get('/', (req, res) => { //la app funciona
 });
 
 const db = mysql.createPool({ //crear la conexion a la base de datos
-	host: '',
-	user: '',
-	password: '',
-	database: ''
+	host: "161.97.162.29",
+    user: "chao_chaossuperadmin",
+    password: "kcuuDPIR@*NUWK7h",
+    database: "chao_chaos",
 })
 
-app.use('/.netlify/functions/api', router);
+app.use('/', router);
 module.exports.handler = serverless(app);
