@@ -71,7 +71,10 @@ router.put("/usuarios/modificar/lol/nombre", (req, res) => { //modificamos nombr
 	const sqlUpdate = "UPDATE `usuarios` SET `nombre_ingame` = ? WHERE `usuarios`.`id_usuario` = ?"
 	db.query(sqlUpdate, [nombreRiot, idUsuario], (err, result) => {
 		res.status(200)
-		res.end("Successfully updated " + idUsuario + " with ID " + idRiot)
+		res.send("Successfully updated " + idUsuario + " with ID " + nombreRiot)
+        if(err){
+            res.send(err)
+        }
 	})
 })
 
