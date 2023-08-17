@@ -1,14 +1,19 @@
 const express = require('express');
 const serverless = require('serverless-http');
 const mysql = require('mysql')
-const app = express();
 const router = express.Router();
 const cors = require('cors')
+const bodyParser = require("body-parser");
+const nodemailer = require("nodemailer");
+const sendEmail = require("../utils/sendEmail")
+
+const app = express();
 
 app.use(cors())
 app.use(express.json())
+app.use(bodyParser.json())
 
-//ruta por determinar
+//https://api.chaoschampionship.com/.netlify/functions/api/
 
 router.get('/', (req, res) => { //la app funciona
     res.send('App is corriendo...');
@@ -21,8 +26,19 @@ const db = mysql.createPool({ //crear la conexion a la base de datos
     database: "chao_chaos",
 })
 
+router.post("/enviarcontacto", (req, res) => {
+    const nombre = req.body.nombre
+    const correo = req.body.correo
+    const asunto = req.body.asunto
+    const mensaje = req.body.mensaje
+
+    sendEmail(nombre, correo, asunto, mensaje)
+        .then((response) => res.send(response.message))
+        .catch((error) => res.status(500).send(error.message));
+});
+
 router.post('/inscribirse', (req, res) => { //inscribimos usuarios
-    
+
     const nombre = req.body.nombre
     const apellido = req.body.apellido
     const nick = req.body.nick
@@ -42,40 +58,40 @@ router.post('/inscribirse', (req, res) => { //inscribimos usuarios
 })
 
 router.get("/usuarios", (req, res) => { //buscamos TODOS los usuarios
-	const sqlSelect = "SELECT * FROM usuarios"
-	db.query(sqlSelect, (err, result) => {
-		if (err) {
-			res.send(err)
-		} else {
-			res.send(result)
-		}
-	})
+    const sqlSelect = "SELECT * FROM usuarios"
+    db.query(sqlSelect, (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
 })
 
 router.put("/usuarios/modificar/lol/ids", (req, res) => { //modificamos ids de riot
-	const idUsuario = req.body.idUsuario
-	const idRiot = req.body.idRiot
+    const idUsuario = req.body.idUsuario
+    const idRiot = req.body.idRiot
     const puuidRiot = req.body.puuidRiot
 
-	const sqlUpdate = "UPDATE `usuarios` SET `id_ingame` = ?, `puuid_ingame` = ? WHERE `usuarios`.`id_usuario` = ?"
-	db.query(sqlUpdate, [idRiot, puuidRiot, idUsuario], (err, result) => {
-		res.status(200)
-		res.end("Successfully updated " + idUsuario + " with ID " + idRiot)
-	})
+    const sqlUpdate = "UPDATE `usuarios` SET `id_ingame` = ?, `puuid_ingame` = ? WHERE `usuarios`.`id_usuario` = ?"
+    db.query(sqlUpdate, [idRiot, puuidRiot, idUsuario], (err, result) => {
+        res.status(200)
+        res.end("Successfully updated " + idUsuario + " with ID " + idRiot)
+    })
 })
 
 router.put("/usuarios/modificar/lol/nombre", (req, res) => { //modificamos nombre de riot
-	const idUsuario = req.body.idUsuario
-	const nombreRiot = req.body.nombreRiot
+    const idUsuario = req.body.idUsuario
+    const nombreRiot = req.body.nombreRiot
 
-	const sqlUpdate = "UPDATE `usuarios` SET `nombre_ingame` = ? WHERE `usuarios`.`id_usuario` = ?"
-	db.query(sqlUpdate, [nombreRiot, idUsuario], (err, result) => {
-		res.status(200)
-		res.send("Successfully updated " + idUsuario + " with ID " + nombreRiot)
-        if(err){
+    const sqlUpdate = "UPDATE `usuarios` SET `nombre_ingame` = ? WHERE `usuarios`.`id_usuario` = ?"
+    db.query(sqlUpdate, [nombreRiot, idUsuario], (err, result) => {
+        res.status(200)
+        res.send("Successfully updated " + idUsuario + " with ID " + nombreRiot)
+        if (err) {
             res.send(err)
         }
-	})
+    })
 })
 
 app.use('/.netlify/functions/api', router);
