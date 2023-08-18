@@ -68,6 +68,30 @@ router.get("/usuarios", (req, res) => { //buscamos TODOS los usuarios
     })
 })
 
+router.get("/usuarios/id=:id", (req, res) => { //buscamos el usuario por id
+    const id = req.params.id
+    const sqlSelect = "SELECT * FROM usuarios WHERE id_usuario = ?"
+    db.query(sqlSelect, [id], (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
+router.get("/usuarios/invocador=:invocador", (req, res) => { //buscamos el usuario por invocador
+    const invocador = req.params.invocador
+    const sqlSelect = "SELECT nombre_ingame FROM usuarios WHERE nombre_ingame = ?"
+    db.query(sqlSelect, [invocador], (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
 router.put("/usuarios/modificar/lol/ids", (req, res) => { //modificamos ids de riot
     const idUsuario = req.body.idUsuario
     const idRiot = req.body.idRiot
