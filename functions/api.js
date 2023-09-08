@@ -68,6 +68,23 @@ router.get("/usuarios", (req, res) => { //buscamos TODOS los usuarios
     })
 })
 
+router.get("/usuarios/limite=:limite&pagina=:pagina", (req, res) => { //buscamos TODOS los usuarios
+
+    const limite = parseInt(req.params.limite)
+    const pagina = parseInt(req.params.pagina)
+
+    const offset = parseInt((pagina - 1) * limite)
+
+    const sqlSelect = "SELECT * FROM usuarios ORDER BY id_usuario LIMIT ? OFFSET ?"
+    db.query(sqlSelect, [limite, offset],(err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
 router.get("/usuarios/id=:id", (req, res) => { //buscamos el usuario por id
     const id = req.params.id
     const sqlSelect = "SELECT * FROM usuarios WHERE id_usuario = ?"
