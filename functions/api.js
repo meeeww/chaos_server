@@ -135,5 +135,16 @@ router.put("/usuarios/modificar/lol/nombre", (req, res) => { //modificamos nombr
     })
 })
 
+router.get("/equipos", (req, res) => { //buscamos TODOS los usuarios
+    const sqlSelect = "SELECT * FROM equipos"
+    db.query(sqlSelect, (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
 app.use('/.netlify/functions/api', router);
 module.exports.handler = serverless(app);
