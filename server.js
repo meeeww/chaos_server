@@ -169,10 +169,21 @@ app.post("/crearequipo", upload.single("imagenEquipo"), (req, res) => {
     nombre = (req.body.nombre)
     acronimo = (req.body.acronimo)
 
-    
+
 
     const sql = "INSERT INTO `equipos` (`nombre_equipo`, `logo_equipo`, `acronimo_equipo`) VALUES (?, ?, ?)"
     db.query(sql, [nombre, image.filename, acronimo], (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
+app.get("/ligas", (req, res) => { //buscamos todas las ligas
+    const sqlSelect = "SELECT * FROM ligas"
+    db.query(sqlSelect, (err, result) => {
         if (err) {
             res.send(err)
         } else {
