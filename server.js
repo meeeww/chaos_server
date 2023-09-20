@@ -1,21 +1,37 @@
 const express = require('express');
-const serverless = require('serverless-http');
 const mysql = require('mysql')
-const router = express.Router();
 const cors = require('cors')
 const bodyParser = require("body-parser");
+const multer = require("multer")
+const path = require("path")
 const nodemailer = require("nodemailer");
-const sendEmail = require("../utils/sendEmail")
+const sendEmail = require("./utils/sendEmail")
 
 const app = express();
 
 app.use(cors())
 app.use(express.json())
 app.use(bodyParser.json())
+app.use(express.static('public'))
+
+console.log(path.join(__dirname, '/../public'))
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'public/images')
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname))
+    }
+})
+
+const upload = multer({
+    storage: storage
+})
 
 //https://api.chaoschampionship.com/.netlify/functions/api/
 
-router.get('/', (req, res) => { //la app funciona
+app.get('/', (req, res) => { //la app funciona
     res.send('App is corriendo...');
 });
 
@@ -26,7 +42,7 @@ const db = mysql.createPool({ //crear la conexion a la base de datos
     database: "chao_chaos",
 })
 
-router.post("/enviarcontacto", (req, res) => {
+app.post("/enviarcontacto", (req, res) => {
     const nombre = req.body.nombre
     const correo = req.body.correo
     const asunto = req.body.asunto
@@ -37,7 +53,7 @@ router.post("/enviarcontacto", (req, res) => {
         .catch((error) => res.status(500).send(error.message));
 });
 
-router.post('/inscribirse', (req, res) => { //inscribimos usuarios
+app.post('/inscribirse', (req, res) => { //inscribimos usuarios
 
     const nombre = req.body.nombre
     const apellido = req.body.apellido
@@ -57,7 +73,7 @@ router.post('/inscribirse', (req, res) => { //inscribimos usuarios
     })
 })
 
-router.get("/usuarios", (req, res) => { //buscamos TODOS los usuarios
+app.get("/usuarios", (req, res) => { //buscamos TODOS los usuarios
     const sqlSelect = "SELECT * FROM usuarios"
     db.query(sqlSelect, (err, result) => {
         if (err) {
@@ -68,7 +84,7 @@ router.get("/usuarios", (req, res) => { //buscamos TODOS los usuarios
     })
 })
 
-router.get("/usuarios/limite=:limite&pagina=:pagina", (req, res) => { //buscamos TODOS los usuarios
+app.get("/usuarios/limite=:limite&pagina=:pagina", (req, res) => { //buscamos TODOS los usuarios
 
     const limite = parseInt(req.params.limite)
     const pagina = parseInt(req.params.pagina)
@@ -76,7 +92,7 @@ router.get("/usuarios/limite=:limite&pagina=:pagina", (req, res) => { //buscamos
     const offset = parseInt((pagina - 1) * limite)
 
     const sqlSelect = "SELECT * FROM usuarios ORDER BY id_usuario LIMIT ? OFFSET ?"
-    db.query(sqlSelect, [limite, offset],(err, result) => {
+    db.query(sqlSelect, [limite, offset], (err, result) => {
         if (err) {
             res.send(err)
         } else {
@@ -85,7 +101,7 @@ router.get("/usuarios/limite=:limite&pagina=:pagina", (req, res) => { //buscamos
     })
 })
 
-router.get("/usuarios/id=:id", (req, res) => { //buscamos el usuario por id
+app.get("/usuarios/id=:id", (req, res) => { //buscamos el usuario por id
     const id = req.params.id
     const sqlSelect = "SELECT * FROM usuarios WHERE id_usuario = ?"
     db.query(sqlSelect, [id], (err, result) => {
@@ -97,7 +113,7 @@ router.get("/usuarios/id=:id", (req, res) => { //buscamos el usuario por id
     })
 })
 
-router.get("/usuarios/invocador=:invocador", (req, res) => { //buscamos el usuario por invocador
+app.get("/usuarios/invocador=:invocador", (req, res) => { //buscamos el usuario por invocador
     const invocador = req.params.invocador
     const sqlSelect = "SELECT nombre_ingame FROM usuarios WHERE nombre_ingame = ?"
     db.query(sqlSelect, [invocador], (err, result) => {
@@ -109,7 +125,7 @@ router.get("/usuarios/invocador=:invocador", (req, res) => { //buscamos el usuar
     })
 })
 
-router.put("/usuarios/modificar/lol/ids", (req, res) => { //modificamos ids de riot
+app.put("/usuarios/modificar/lol/ids", (req, res) => { //modificamos ids de riot
     const idUsuario = req.body.idUsuario
     const idRiot = req.body.idRiot
     const puuidRiot = req.body.puuidRiot
@@ -121,7 +137,7 @@ router.put("/usuarios/modificar/lol/ids", (req, res) => { //modificamos ids de r
     })
 })
 
-router.put("/usuarios/modificar/lol/nombre", (req, res) => { //modificamos nombre de riot
+app.put("/usuarios/modificar/lol/nombre", (req, res) => { //modificamos nombre de riot
     const idUsuario = req.body.idUsuario
     const nombreRiot = req.body.nombreRiot
 
@@ -135,7 +151,7 @@ router.put("/usuarios/modificar/lol/nombre", (req, res) => { //modificamos nombr
     })
 })
 
-router.get("/equipos", (req, res) => { //buscamos TODOS los usuarios
+app.get("/equipos", (req, res) => { //buscamos TODOS los usuarios
     const sqlSelect = "SELECT * FROM equipos"
     db.query(sqlSelect, (err, result) => {
         if (err) {
@@ -146,5 +162,25 @@ router.get("/equipos", (req, res) => { //buscamos TODOS los usuarios
     })
 })
 
-app.use('/.netlify/functions/api', router);
-module.exports.handler = serverless(app);
+app.post("/crearequipo", upload.single("imagenEquipo"), (req, res) => {
+    image = req.file
+
+    console.log(req.body.nombre)
+    nombre = (req.body.nombre)
+    acronimo = (req.body.acronimo)
+
+    
+
+    const sql = "INSERT INTO `equipos` (`nombre_equipo`, `logo_equipo`, `acronimo_equipo`) VALUES (?, ?, ?)"
+    db.query(sql, [nombre, image.filename, acronimo], (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
+app.listen(3000, () => {
+    console.log("funcionando")
+})
