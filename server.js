@@ -163,7 +163,7 @@ app.get("/equipos", (req, res) => { //buscamos TODOS los equipos
 app.get("/equipos/id=:id", (req, res) => { //buscamos equipo por id
     const id = req.params.id
 
-    const sqlSelect = "SELECT * FROM equipos WHERE id_equipo = ?"
+    const sqlSelect = "SELECT * FROM equipos INNER JOIN ligas ON equipos.id_liga = ligas.id_liga INNER JOIN temporadas ON equipos.id_temporada = temporadas.id_temporada WHERE equipos.id_equipo = ?"
     db.query(sqlSelect, [id], (err, result) => {
         if (err) {
             res.send(err)
@@ -175,15 +175,28 @@ app.get("/equipos/id=:id", (req, res) => { //buscamos equipo por id
 
 app.post("/crearequipo", upload.single("imagenEquipo"), (req, res) => {
     image = req.file
-
-    console.log(req.body.nombre)
     nombre = (req.body.nombre)
     acronimo = (req.body.acronimo)
 
-
-
     const sql = "INSERT INTO `equipos` (`nombre_equipo`, `logo_equipo`, `acronimo_equipo`) VALUES (?, ?, ?)"
     db.query(sql, [nombre, image.filename, acronimo], (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
+app.put("/modificarequipo", (req, res) => {
+    id = req.body.id
+    columna = req.body.columna
+    valor = req.body.valor
+
+    console.log(typeof columna)
+
+    const sql = "UPDATE equipos SET `" + columna + "` = ? WHERE id_equipo = ?"
+    db.query(sql, [valor, id], (err, result) => {
         if (err) {
             res.send(err)
         } else {
@@ -208,6 +221,17 @@ app.delete("/borrarequipo", (req, res) => {
 
 app.get("/ligas", (req, res) => { //buscamos todas las ligas
     const sqlSelect = "SELECT * FROM ligas"
+    db.query(sqlSelect, (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
+app.get("/temporadas", (req, res) => { //buscamos todas las temporadas
+    const sqlSelect = "SELECT * FROM temporadas"
     db.query(sqlSelect, (err, result) => {
         if (err) {
             res.send(err)
