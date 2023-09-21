@@ -196,9 +196,10 @@ app.post("/log", (req, res) => {
     const id_usuario = req.body.id_usuario
     const fecha = req.body.fecha
     const accion = req.body.accion
+    const info = req.body.info
 
-    const sqlInsert = "INSERT INTO `logs` (`id_log`, `id_usuario`, `fecha`, `accion`) VALUES (NULL, ?, ?, ?)"
-    db.query(sqlInsert, [id_usuario, fecha, accion], (err, result) => {
+    const sqlInsert = "INSERT INTO `logs` (`id_log`, `id_usuario`, `fecha`, `accion`, `info`) VALUES (NULL, ?, ?, ?, ?)"
+    db.query(sqlInsert, [id_usuario, fecha, accion, info], (err, result) => {
         if (!err) {
             res.send("Successfully inserted - 200")
         } else {
