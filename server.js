@@ -14,8 +14,6 @@ app.use(express.json())
 app.use(bodyParser.json())
 app.use(express.static('public'))
 
-console.log(path.join(__dirname, '/../public'))
-
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'public/images')
@@ -151,9 +149,22 @@ app.put("/usuarios/modificar/lol/nombre", (req, res) => { //modificamos nombre d
     })
 })
 
-app.get("/equipos", (req, res) => { //buscamos TODOS los usuarios
+app.get("/equipos", (req, res) => { //buscamos TODOS los equipos
     const sqlSelect = "SELECT * FROM equipos"
     db.query(sqlSelect, (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
+app.get("/equipos/id=:id", (req, res) => { //buscamos equipo por id
+    const id = req.params.id
+
+    const sqlSelect = "SELECT * FROM equipos WHERE id_equipo = ?"
+    db.query(sqlSelect, [id], (err, result) => {
         if (err) {
             res.send(err)
         } else {
@@ -177,6 +188,20 @@ app.post("/crearequipo", upload.single("imagenEquipo"), (req, res) => {
             res.send(err)
         } else {
             res.send(result)
+        }
+    })
+})
+
+app.delete("/borrarequipo", (req, res) => {
+    id = req.body.id
+
+    const sql = "DELETE FROM equipos WHERE id_equipo = ?"
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.status(200)
+            res.end("Successfully deleted - 200")
         }
     })
 })
