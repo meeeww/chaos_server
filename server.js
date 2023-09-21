@@ -192,6 +192,21 @@ app.get("/ligas", (req, res) => { //buscamos todas las ligas
     })
 })
 
+app.post("/log", (req, res) => {
+    const id_usuario = req.body.id_usuario
+    const fecha = req.body.fecha
+    const accion = req.body.accion
+
+    const sqlInsert = "INSERT INTO `logs` (`id_log`, `id_usuario`, `fecha`, `accion`) VALUES (NULL, ?, ?, ?)"
+    db.query(sqlInsert, [id_usuario, fecha, accion], (err, result) => {
+        if (!err) {
+            res.send("Successfully inserted - 200")
+        } else {
+            res.send(err)
+        }
+    })
+});
+
 app.listen(3000, () => {
     console.log("funcionando")
 })
