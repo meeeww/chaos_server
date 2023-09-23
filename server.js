@@ -99,9 +99,10 @@ app.get("/usuarios/limite=:limite&pagina=:pagina", (req, res) => { //buscamos TO
     })
 })
 
-app.get("/usuarios/id=:id", (req, res) => { //buscamos el usuario por id
+app.get("/usuarios/id=:id", (req, res) => { //buscamos equipo por id
     const id = req.params.id
-    const sqlSelect = "SELECT * FROM usuarios WHERE id_usuario = ?"
+
+    const sqlSelect = "SELECT * FROM `usuarios` WHERE usuarios.id_usuario = ?"
     db.query(sqlSelect, [id], (err, result) => {
         if (err) {
             res.send(err)
@@ -111,10 +112,11 @@ app.get("/usuarios/id=:id", (req, res) => { //buscamos el usuario por id
     })
 })
 
-app.get("/usuarios/invocador=:invocador", (req, res) => { //buscamos el usuario por invocador
-    const invocador = req.params.invocador
-    const sqlSelect = "SELECT nombre_ingame FROM usuarios WHERE nombre_ingame = ?"
-    db.query(sqlSelect, [invocador], (err, result) => {
+app.get("/usuarios/equipo/id=:id", (req, res) => { //buscamos equipo por id
+    const id = req.params.id
+
+    const sqlSelect = "SELECT * FROM equipos INNER JOIN usuarios ON equipos.id_equipo = usuarios.id_equipo INNER JOIN ligas ON equipos.id_liga = ligas.id_liga INNER JOIN temporadas ON equipos.id_temporada = temporadas.id_temporada WHERE usuarios.id_usuario = ?"
+    db.query(sqlSelect, [id], (err, result) => {
         if (err) {
             res.send(err)
         } else {
@@ -123,28 +125,63 @@ app.get("/usuarios/invocador=:invocador", (req, res) => { //buscamos el usuario 
     })
 })
 
-app.put("/usuarios/modificar/lol/ids", (req, res) => { //modificamos ids de riot
-    const idUsuario = req.body.idUsuario
-    const idRiot = req.body.idRiot
-    const puuidRiot = req.body.puuidRiot
+app.get("/usuarios/cuentas/id=:id", (req, res) => { //buscamos equipo por id
+    const id = req.params.id
 
-    const sqlUpdate = "UPDATE `usuarios` SET `id_ingame` = ?, `puuid_ingame` = ? WHERE `usuarios`.`id_usuario` = ?"
-    db.query(sqlUpdate, [idRiot, puuidRiot, idUsuario], (err, result) => {
-        res.status(200)
-        res.end("Successfully updated " + idUsuario + " with ID " + idRiot)
+    const sqlSelect = "SELECT * FROM `cuentas_lol` INNER JOIN usuarios ON cuentas_lol.id_usuario = usuarios.id_usuario WHERE usuarios.id_usuario = ?"
+    db.query(sqlSelect, [id], (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
     })
 })
 
-app.put("/usuarios/modificar/lol/nombre", (req, res) => { //modificamos nombre de riot
-    const idUsuario = req.body.idUsuario
-    const nombreRiot = req.body.nombreRiot
+app.post("/crearusuario", (req, res) => {
+    nombre = (req.body.nombre)
+    apellido = (req.body.apellido)
+    nick = req.body.nick
+    edad = req.body.edad
+    rol = req.body.rol
 
-    const sqlUpdate = "UPDATE `usuarios` SET `nombre_ingame` = ? WHERE `usuarios`.`id_usuario` = ?"
-    db.query(sqlUpdate, [nombreRiot, idUsuario], (err, result) => {
-        res.status(200)
-        res.send("Successfully updated " + idUsuario + " with ID " + nombreRiot)
+    const sql = "INSERT INTO `usuarios` (`id_usuario`, `id_equipo`, `id_discord`, `nombre_usuario`, `apellido_usuario`, `nick_usuario`, `edad`, `rol`) VALUES (NULL, NULL, NULL, ?, ?, ?, ?, ?)"
+    db.query(sql, [nombre, apellido, nick, edad, rol], (err, result) => {
         if (err) {
             res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
+app.put("/modificarusuario", (req, res) => {
+    id = req.body.id
+    columna = req.body.columna
+    valor = req.body.valor
+
+    console.log(typeof columna)
+
+    const sql = "UPDATE usuarios SET `" + columna + "` = ? WHERE id_usuario = ?"
+    db.query(sql, [valor, id], (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
+app.delete("/borrarusuario", (req, res) => {
+    id = req.body.id
+
+    const sql = "DELETE FROM usuarios WHERE id_usuario = ?"
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.status(200)
+            res.end("Successfully deleted - 200")
         }
     })
 })
@@ -240,6 +277,27 @@ app.get("/temporadas", (req, res) => { //buscamos todas las temporadas
         }
     })
 })
+
+app.post("/crearcuenta", (req, res) => {
+    idusuario = req.body.id_usuario
+    juego = req.body.id_juego
+    invocador = req.body.invocador
+    idlol = req.body.id_lol
+    puuidlol = req.body.puuid_lol
+    lineaprincipal = req.body.linea_principal
+    lineasecundaria = req.body.linea_secundaria
+
+    const sql = "INSERT INTO `cuentas_lol` (`id_cuenta`, `id_usuario`, `id_juego`, `invocador`, `id_lol`, `puuid_lol`, `linea_principal`, `linea_secundaria`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)"
+    db.query(sql, [idusuario, juego, invocador, idlol, puuidlol, lineaprincipal, lineasecundaria], (err, result) => {
+        if (err) {
+            res.send(err)
+        } else {
+            res.send(result)
+        }
+    })
+})
+
+app.post("/crearcuenta")
 
 app.post("/log", (req, res) => {
     const id_usuario = req.body.id_usuario
