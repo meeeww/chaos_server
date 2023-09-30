@@ -9,7 +9,7 @@ const sendEmail = require("./utils/sendEmail");
 
 const app = express();
 
-app.use(cors());
+app.use(cors())
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.static("public"));
@@ -32,9 +32,14 @@ const upload = multer({
 
 //https://api.chaoschampionship.com/.netlify/functions/api/
 
+var corsOptions = {
+  origin: ['https://panel.chaosseries.com', 'http://localhost:5173/'],
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+
 app.get("/", (req, res) => {
   //la app funciona
-  res.send("App is corriendo...");
+  res.send("App ids corriendo...");
 });
 
 const db = mysql.createPool({
@@ -45,7 +50,7 @@ const db = mysql.createPool({
   database: "chao_chaos",
 });
 
-app.post("/enviarcontacto", (req, res) => {
+app.post("/enviarcontacto", cors(corsOptions), (req, res) => {
   const nombre = req.body.nombre;
   const correo = req.body.correo;
   const asunto = req.body.asunto;
@@ -56,7 +61,7 @@ app.post("/enviarcontacto", (req, res) => {
     .catch((error) => res.status(500).send(error.message));
 });
 
-app.post("/inscribirse", (req, res) => {
+app.post("/inscribirse", cors(corsOptions), (req, res) => {
   //inscribimos usuarios
 
   const nombre = req.body.nombre;
@@ -141,7 +146,22 @@ app.get("/usuarios/nombre=:nombre", (req, res) => {
   });
 });
 
-app.post("/crearsesion", (req, res) => {
+app.get("/buscarsesion/token=:token", (req, res) => {
+  //buscamos sesion por id usuario
+  const token = req.params.token;
+
+  const sqlSelect =
+    "SELECT sesiones.token, usuarios.id_usuario, usuarios.id_equipo, usuarios.id_discord, usuarios.nombre_usuario, usuarios.apellido_usuario, usuarios.nick_usuario, usuarios.edad, usuarios.rol, usuarios.icono, usuarios.usuario_activado FROM sesiones LEFT JOIN usuarios ON sesiones.id_usuario = usuarios.id_usuario WHERE token = ?";
+  db.query(sqlSelect, [token], (err, result) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.post("/crearsesion", cors(corsOptions), (req, res) => {
   id = req.body.id;
   fecha = req.body.fecha;
   dispositivo = req.body.dispositivo;
@@ -188,7 +208,7 @@ app.get("/usuarios/cuentas/id=:id", (req, res) => {
   });
 });
 
-app.post("/crearusuario", (req, res) => {
+app.post("/crearusuario", cors(corsOptions), (req, res) => {
   nombre = req.body.nombre;
   apellido = req.body.apellido;
   nick = req.body.nick;
@@ -206,7 +226,7 @@ app.post("/crearusuario", (req, res) => {
   });
 });
 
-app.post("/registrarse", (req, res) => {
+app.post("/registrarse", cors(corsOptions), (req, res) => {
   nombre = req.body.nombre;
   apellido = req.body.apellido;
   nick = req.body.nick;
@@ -224,7 +244,7 @@ app.post("/registrarse", (req, res) => {
   });
 });
 
-app.put("/modificarusuario", (req, res) => {
+app.put("/modificarusuario", cors(corsOptions), (req, res) => {
   id = req.body.id;
   columna = req.body.columna;
   valor = req.body.valor;
@@ -241,7 +261,7 @@ app.put("/modificarusuario", (req, res) => {
   });
 });
 
-app.delete("/borrarusuario", (req, res) => {
+app.delete("/borrarusuario", cors(corsOptions), (req, res) => {
   id = req.body.id;
 
   const sqlDelete = "DELETE FROM sesiones WHERE id_usuario = ?";
@@ -289,7 +309,7 @@ app.get("/equipos/id=:id", (req, res) => {
   });
 });
 
-app.post("/crearequipo", upload.single("imagenEquipo"), (req, res) => {
+app.post("/crearequipo", cors(corsOptions), upload.single("imagenEquipo"), (req, res) => {
   image = req.file;
   nombre = req.body.nombre;
   acronimo = req.body.acronimo;
@@ -305,7 +325,7 @@ app.post("/crearequipo", upload.single("imagenEquipo"), (req, res) => {
   });
 });
 
-app.put("/modificarequipo", (req, res) => {
+app.put("/modificarequipo", cors(corsOptions), (req, res) => {
   id = req.body.id;
   columna = req.body.columna;
   valor = req.body.valor;
@@ -322,7 +342,7 @@ app.put("/modificarequipo", (req, res) => {
   });
 });
 
-app.delete("/borrarequipo", (req, res) => {
+app.delete("/borrarequipo", cors(corsOptions), (req, res) => {
   id = req.body.id;
 
   const sql = "DELETE FROM equipos WHERE id_equipo = ?";
@@ -360,7 +380,7 @@ app.get("/temporadas", (req, res) => {
   });
 });
 
-app.post("/crearcuenta", (req, res) => {
+app.post("/crearcuenta", cors(corsOptions), (req, res) => {
   idusuario = req.body.id_usuario;
   juego = req.body.id_juego;
   invocador = req.body.invocador;
@@ -394,7 +414,7 @@ app.post("/crearcuenta", (req, res) => {
 
 app.post("/crearcuenta");
 
-app.post("/log", (req, res) => {
+app.post("/log", cors(corsOptions), (req, res) => {
   const id_usuario = req.body.id_usuario;
   const fecha = req.body.fecha;
   const accion = req.body.accion;
