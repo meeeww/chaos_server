@@ -250,10 +250,11 @@ app.post("/crearusuario", cors(corsOptions), (req, res) => {
   nick = req.body.nick;
   edad = req.body.edad;
   rol = req.body.rol;
+  contra = req.body.contra;
 
   const sql =
-    "INSERT INTO `usuarios` (`id_usuario`, `id_equipo`, `id_discord`, `nombre_usuario`, `apellido_usuario`, `nick_usuario`, `edad`, `rol`) VALUES (NULL, NULL, NULL, ?, ?, ?, ?, ?)";
-  db.query(sql, [nombre, apellido, nick, edad, rol], (err, result) => {
+    "INSERT INTO `usuarios` (`id_usuario`, `id_equipo`, `id_discord`, `nombre_usuario`, `apellido_usuario`, `nick_usuario`, `edad`, `rol`, `contra`) VALUES (NULL, NULL, NULL, ?, ?, ?, ?, ?, ?)";
+  db.query(sql, [nombre, apellido, nick, edad, rol, contra], (err, result) => {
     if (err) {
       res.send(err);
     } else {
