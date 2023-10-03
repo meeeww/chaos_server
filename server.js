@@ -433,6 +433,19 @@ app.post("/crearcuenta", cors(corsOptions), (req, res) => {
   });
 });
 
+app.delete("/eliminarcuenta", cors(corsOptions), (req, res) => {
+  id_cuenta = req.body.id_cuenta;
+
+  const sqlDelete = "DELETE FROM cuentas_lol WHERE id_cuenta = ?";
+  db.query(sqlDelete, [id_cuenta], (err, result) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
 app.post("/log", cors(corsOptions), (req, res) => {
   const id_usuario = req.body.id_usuario;
   const fecha = req.body.fecha;
