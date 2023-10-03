@@ -9,7 +9,7 @@ const sendEmail = require("./utils/sendEmail");
 
 const app = express();
 
-app.use(cors())
+app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.static("public"));
@@ -19,10 +19,7 @@ const storage = multer.diskStorage({
     cb(null, "public/images");
   },
   filename: (req, file, cb) => {
-    cb(
-      null,
-      file.fieldname + "_" + Date.now() + path.extname(file.originalname)
-    );
+    cb(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname));
   },
 });
 
@@ -33,9 +30,9 @@ const upload = multer({
 //https://api.chaoschampionship.com/.netlify/functions/api/
 
 var corsOptions = {
-  origin: ['https://panel.chaosseries.com', 'http://localhost:5173/'],
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
+  origin: ["https://panel.chaosseries.com", "http://localhost:5173/"],
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
 
 app.get("/", (req, res) => {
   //la app funciona
@@ -74,17 +71,13 @@ app.post("/inscribirse", cors(corsOptions), (req, res) => {
 
   const sqlInsert =
     "INSERT INTO `usuarios` (`id_usuario`, `id_equipo`, `id_discord`, `nombre_usuario`, `apellido_usuario`, `nick_usuario`, `nombre_ingame`, `id_ingame`, `puuid_ingame`, `edad`, `rol`, `linea_principal`, `linea_secundaria`, `verificado`) VALUES (NULL, NULL, NULL, ?, ?, ?, ?, NULL, NULL, ?, 0, ?, ?, 0)";
-  db.query(
-    sqlInsert,
-    [nombre, apellido, nick, invocador, edad, principal, secundaria],
-    (err, result) => {
-      if (!err) {
-        res.send("Successfully inserted - 200");
-      } else {
-        res.send(err);
-      }
+  db.query(sqlInsert, [nombre, apellido, nick, invocador, edad, principal, secundaria], (err, result) => {
+    if (!err) {
+      res.send("Successfully inserted - 200");
+    } else {
+      res.send(err);
     }
-  );
+  });
 });
 
 app.get("/usuarios", (req, res) => {
@@ -107,8 +100,7 @@ app.get("/usuarios/limite=:limite&pagina=:pagina", (req, res) => {
 
   const offset = parseInt((pagina - 1) * limite);
 
-  const sqlSelect =
-    "SELECT * FROM usuarios ORDER BY id_usuario LIMIT ? OFFSET ?";
+  const sqlSelect = "SELECT * FROM usuarios ORDER BY id_usuario LIMIT ? OFFSET ?";
   db.query(sqlSelect, [limite, offset], (err, result) => {
     if (err) {
       res.send(err);
@@ -151,7 +143,7 @@ app.get("/buscarsesion/token=:token", (req, res) => {
   const token = req.params.token;
 
   const sqlSelect =
-    "SELECT sesiones.token, usuarios.id_usuario, usuarios.id_equipo, usuarios.id_discord, usuarios.nombre_usuario, usuarios.apellido_usuario, usuarios.nick_usuario, usuarios.edad, usuarios.rol, usuarios.icono, usuarios.usuario_activado FROM sesiones LEFT JOIN usuarios ON sesiones.id_usuario = usuarios.id_usuario WHERE token = ?";
+    "SELECT sesiones.token, usuarios.id_usuario, usuarios.id_equipo, usuarios.id_discord, usuarios.nombre_usuario, usuarios.apellido_usuario, usuarios.nick_usuario, usuarios.edad, usuarios.rol, usuarios.icono, usuarios.usuario_activado, usuarios.circuitotormenta, usuarios.twitter, usuarios.discord FROM sesiones LEFT JOIN usuarios ON sesiones.id_usuario = usuarios.id_usuario WHERE token = ?";
   db.query(sqlSelect, [token], (err, result) => {
     if (err) {
       res.send(err);
@@ -167,8 +159,7 @@ app.post("/crearsesion", cors(corsOptions), (req, res) => {
   dispositivo = req.body.dispositivo;
   token = req.body.token;
 
-  const sql =
-    "INSERT INTO `sesiones` (`id_usuario`, `fecha`, `dispositivo`, `token`) VALUES (?, ?, ?, ?)";
+  const sql = "INSERT INTO `sesiones` (`id_usuario`, `fecha`, `dispositivo`, `token`) VALUES (?, ?, ?, ?)";
   db.query(sql, [id, fecha, dispositivo, token], (err, result) => {
     if (err) {
       res.send(err);
@@ -200,6 +191,51 @@ app.get("/usuarios/cuentas/id=:id", (req, res) => {
   const sqlSelect =
     "SELECT * FROM `cuentas_lol` LEFT JOIN usuarios ON cuentas_lol.id_usuario = usuarios.id_usuario WHERE usuarios.id_usuario = ?";
   db.query(sqlSelect, [id], (err, result) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.get("/usuarios/enlaces/id=:id", (req, res) => {
+  const id = req.params.id;
+  const sqlSelect =
+    "SELECT id_usuario, id_discord, circuitotormenta, twitter FROM `usuarios` WHERE usuarios.id_usuario = ?";
+
+  db.query(sqlSelect, [id], (err, result) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.put("/usuarios/enlaces", cors(corsOptions), (req, res) => {
+  const id_usuario = req.body.id_usuario;
+  const columna = req.body.columna;
+  const valor = req.body.valor;
+
+  const sqlUpdate = "UPDATE usuarios SET " + columna + " = ? WHERE id_usuario = ?";
+
+  db.query(sqlUpdate, [valor, id_usuario], (err, result) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.delete("/usuarios/enlaces", cors(corsOptions), (req, res) => {
+  const id_usuario = req.body.id_usuario;
+  const columna = req.body.columna;
+
+  const sqlDelete = "UPDATE usuarios SET " + columna + " = null WHERE id_usuario = ?";
+
+  db.query(sqlDelete, [id_usuario], (err, result) => {
     if (err) {
       res.send(err);
     } else {
@@ -244,7 +280,8 @@ app.post("/registrarse", cors(corsOptions), (req, res) => {
   });
 });
 
-app.put("/modificarusuario", cors(corsOptions), (req, res) => {
+app.put("/modificarusuario", (req, res) => {
+  console.log("hola");
   id = req.body.id;
   columna = req.body.columna;
   valor = req.body.valor;
@@ -314,8 +351,7 @@ app.post("/crearequipo", cors(corsOptions), upload.single("imagenEquipo"), (req,
   nombre = req.body.nombre;
   acronimo = req.body.acronimo;
 
-  const sql =
-    "INSERT INTO `equipos` (`nombre_equipo`, `logo_equipo`, `acronimo_equipo`) VALUES (?, ?, ?)";
+  const sql = "INSERT INTO `equipos` (`nombre_equipo`, `logo_equipo`, `acronimo_equipo`) VALUES (?, ?, ?)";
   db.query(sql, [nombre, image.filename, acronimo], (err, result) => {
     if (err) {
       res.send(err);
@@ -382,37 +418,20 @@ app.get("/temporadas", (req, res) => {
 
 app.post("/crearcuenta", cors(corsOptions), (req, res) => {
   idusuario = req.body.id_usuario;
-  juego = req.body.id_juego;
   invocador = req.body.invocador;
-  idlol = req.body.id_lol;
-  puuidlol = req.body.puuid_lol;
   lineaprincipal = req.body.linea_principal;
   lineasecundaria = req.body.linea_secundaria;
 
   const sql =
-    "INSERT INTO `cuentas_lol` (`id_cuenta`, `id_usuario`, `id_juego`, `invocador`, `id_lol`, `puuid_lol`, `linea_principal`, `linea_secundaria`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)";
-  db.query(
-    sql,
-    [
-      idusuario,
-      juego,
-      invocador,
-      idlol,
-      puuidlol,
-      lineaprincipal,
-      lineasecundaria,
-    ],
-    (err, result) => {
-      if (err) {
-        res.send(err);
-      } else {
-        res.send(result);
-      }
+    "INSERT INTO `cuentas_lol` (`id_cuenta`, `id_usuario`, `id_juego`, `invocador`, `id_lol`, `puuid_lol`, `linea_principal`, `linea_secundaria`) VALUES (NULL, ?, 1, ?, NULL, NULL, ?, ?)";
+  db.query(sql, [idusuario, invocador, lineaprincipal, lineasecundaria], (err, result) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(result);
     }
-  );
+  });
 });
-
-app.post("/crearcuenta");
 
 app.post("/log", cors(corsOptions), (req, res) => {
   const id_usuario = req.body.id_usuario;
@@ -420,8 +439,7 @@ app.post("/log", cors(corsOptions), (req, res) => {
   const accion = req.body.accion;
   const info = req.body.info;
 
-  const sqlInsert =
-    "INSERT INTO `logs` (`id_log`, `id_usuario`, `fecha`, `accion`, `info`) VALUES (NULL, ?, ?, ?, ?)";
+  const sqlInsert = "INSERT INTO `logs` (`id_log`, `id_usuario`, `fecha`, `accion`, `info`) VALUES (NULL, ?, ?, ?, ?)";
   db.query(sqlInsert, [id_usuario, fecha, accion, info], (err, result) => {
     if (!err) {
       res.send("Successfully inserted - 200");
