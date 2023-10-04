@@ -174,7 +174,7 @@ app.get("/usuarios/equipo/id=:id", (req, res) => {
   const id = req.params.id;
 
   const sqlSelect =
-    "SELECT * FROM equipos INNER JOIN usuarios ON equipos.id_equipo = usuarios.id_equipo INNER JOIN ligas ON equipos.id_liga = ligas.id_liga INNER JOIN temporadas ON equipos.id_temporada = temporadas.id_temporada WHERE usuarios.id_usuario = ?";
+    "SELECT * FROM equipos LEFT JOIN usuarios ON equipos.id_equipo = usuarios.id_equipo LEFT JOIN ligas ON equipos.id_liga = ligas.id_liga LEFT JOIN temporadas ON equipos.id_temporada = temporadas.id_temporada WHERE usuarios.id_usuario = ?";
   db.query(sqlSelect, [id], (err, result) => {
     if (err) {
       res.send(err);
