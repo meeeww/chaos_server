@@ -302,18 +302,25 @@ app.put("/modificarusuario", (req, res) => {
 app.delete("/borrarusuario", cors(corsOptions), (req, res) => {
   id = req.body.id;
 
+  const sqlDeleteLogs = "DELETE FROM logs WHERE id_usuario = ?";
   const sqlDelete = "DELETE FROM sesiones WHERE id_usuario = ?";
   const sql = "DELETE FROM usuarios WHERE id_usuario = ?";
-  db.query(sqlDelete, [id], (err, result) => {
+  db.query(sqlDeleteLogs, [id], (err, results) => {
     if (err) {
       res.send(err);
     } else {
-      db.query(sql, [id], (err, result) => {
+      db.query(sqlDelete, [id], (err, result) => {
         if (err) {
           res.send(err);
         } else {
-          res.status(200);
-          res.end("Successfully deleted - 200");
+          db.query(sql, [id], (err, result) => {
+            if (err) {
+              res.send(err);
+            } else {
+              res.status(200);
+              res.end("Successfully deleted - 200");
+            }
+          });
         }
       });
     }
