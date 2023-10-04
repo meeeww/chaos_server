@@ -339,6 +339,20 @@ app.get("/equipos", (req, res) => {
   });
 });
 
+app.get("/equipos/usuarios/id=:id", (req, res) => {
+  //buscamos los usuarios dentro de un equipo
+  const id = req.params.id;
+
+  const sqlSelect = "SELECT * FROM usuarios WHERE id_equipo = ?";
+  db.query(sqlSelect, [id], (err, result) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
 app.get("/equipos/id=:id", (req, res) => {
   //buscamos equipo por id
   const id = req.params.id;
