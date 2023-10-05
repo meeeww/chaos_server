@@ -219,12 +219,20 @@ app.put("/usuarios/enlaces", cors(corsOptions), (req, res) => {
   const valor = req.body.valor;
 
   const sqlUpdate = "UPDATE usuarios SET " + columna + " = ? WHERE id_usuario = ?";
-
-  db.query(sqlUpdate, [valor, id_usuario], (err, result) => {
+  const sqlSelect = "SELECT " + columna + " FROM `usuarios` WHERE " + columna + " = ?";
+  db.query(sqlSelect, [valor], (err, result) => {
     if (err) {
       res.send(err);
+    } else if(Object.values(JSON.parse(JSON.stringify(result))).length == 0) {
+      db.query(sqlUpdate, [valor, id_usuario], (err, result) => {
+        if (err) {
+          res.send(err);
+        } else {
+          res.send(result);
+        }
+      });
     } else {
-      res.send(result);
+      res.send(result)
     }
   });
 });
@@ -282,12 +290,9 @@ app.post("/registrarse", cors(corsOptions), (req, res) => {
 });
 
 app.put("/modificarusuario", (req, res) => {
-  console.log("hola");
   id = req.body.id;
   columna = req.body.columna;
   valor = req.body.valor;
-
-  console.log(typeof columna);
 
   const sql = "UPDATE usuarios SET `" + columna + "` = ? WHERE id_usuario = ?";
   db.query(sql, [valor, id], (err, result) => {
@@ -387,8 +392,6 @@ app.put("/modificarequipo", cors(corsOptions), (req, res) => {
   id = req.body.id;
   columna = req.body.columna;
   valor = req.body.valor;
-
-  console.log(typeof columna);
 
   const sql = "UPDATE equipos SET `" + columna + "` = ? WHERE id_equipo = ?";
   db.query(sql, [valor, id], (err, result) => {
