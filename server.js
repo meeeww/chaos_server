@@ -210,6 +210,19 @@ app.get("/cuentas", (req, res) => {
   });
 });
 
+app.get("/cuenta/nombre=:nombre", (req, res) => {
+  const nombre = req.params.nombre;
+
+  const sqlSelect = "SELECT invocador FROM cuentas_lol WHERE invocador = ?";
+  db.query(sqlSelect, [nombre], (err, result) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
 app.get("/usuarios/enlaces/id=:id", (req, res) => {
   const id = req.params.id;
   const sqlSelect =
