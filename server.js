@@ -185,7 +185,7 @@ app.get("/usuarios/equipo/id=:id", (req, res) => {
 });
 
 app.get("/usuarios/cuentas/id=:id", (req, res) => {
-  //buscamos equipo por id
+  //buscamos cuentas por id de usuario
   const id = req.params.id;
 
   const sqlSelect =
@@ -223,7 +223,7 @@ app.put("/usuarios/enlaces", cors(corsOptions), (req, res) => {
   db.query(sqlSelect, [valor], (err, result) => {
     if (err) {
       res.send(err);
-    } else if(Object.values(JSON.parse(JSON.stringify(result))).length == 0) {
+    } else if (Object.values(JSON.parse(JSON.stringify(result))).length == 0) {
       db.query(sqlUpdate, [valor, id_usuario], (err, result) => {
         if (err) {
           res.send(err);
@@ -232,7 +232,7 @@ app.put("/usuarios/enlaces", cors(corsOptions), (req, res) => {
         }
       });
     } else {
-      res.send(result)
+      res.send(result);
     }
   });
 });
@@ -296,6 +296,20 @@ app.put("/modificarusuario", (req, res) => {
 
   const sql = "UPDATE usuarios SET `" + columna + "` = ? WHERE id_usuario = ?";
   db.query(sql, [valor, id], (err, result) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.put("usuario/icono", (req, res) => {
+  id = req.body.id;
+  icono = req.body.icono;
+
+  const sql = "UPDATE usuarios SET icono = ? WHERE id_usuario = ?";
+  db.query(sql, [icono, id], (err, result) => {
     if (err) {
       res.send(err);
     } else {
