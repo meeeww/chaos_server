@@ -199,6 +199,17 @@ app.get("/usuarios/cuentas/id=:id", (req, res) => {
   });
 });
 
+app.get("/cuentas", (req, res) => {
+  const sqlSelect = "SELECT id_cuenta, invocador, id_lol, puuid_lol FROM cuentas_lol";
+  db.query(sqlSelect, (err, result) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
 app.get("/usuarios/enlaces/id=:id", (req, res) => {
   const id = req.params.id;
   const sqlSelect =
@@ -304,7 +315,7 @@ app.put("/modificarusuario", (req, res) => {
   });
 });
 
-app.put("usuario/icono", (req, res) => {
+app.put("/usuario/icono", (req, res) => {
   id = req.body.id;
   icono = req.body.icono;
 
@@ -464,6 +475,22 @@ app.post("/crearcuenta", cors(corsOptions), (req, res) => {
   const sql =
     "INSERT INTO `cuentas_lol` (`id_cuenta`, `id_usuario`, `id_juego`, `invocador`, `id_lol`, `puuid_lol`, `linea_principal`, `linea_secundaria`) VALUES (NULL, ?, 1, ?, NULL, NULL, ?, ?)";
   db.query(sql, [idusuario, invocador, lineaprincipal, lineasecundaria], (err, result) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
+app.put("/cuenta", (req, res) => {
+  id = req.body.id;
+  id_lol = req.body.id_lol;
+  puuid_lol = req.body.puuid_lol;
+  invocador = req.body.invocador;
+
+  const sql = "UPDATE cuentas_lol SET invocador = ?, id_lol = ?, puuid_lol = ? WHERE id_cuenta = ?";
+  db.query(sql, [invocador, id_lol, puuid_lol, id], (err, result) => {
     if (err) {
       res.send(err);
     } else {
