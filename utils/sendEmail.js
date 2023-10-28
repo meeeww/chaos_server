@@ -7,20 +7,20 @@ function sendEmail(nombre, correo, asunto, mensaje) {
             port: "465",
             secure: true,
             auth: {
-                user: "contacto@chaoschampionship.com",
-                pass: "S*95ZCo1W$xOoMl&",
+                user: "contacto@chaosseries.com",
+                pass: "nDpPq7aDH#8vKBEB",
             },
         });
 
         const mail_configs = {
-            from: "contacto@chaoschampionship.com",
-            to: "contacto@chaoschampionship.com",
+            from: "contacto@chaosseries.com",
+            to: "contacto@chaosseries.com",
             subject: "Nuevo Contacto de " + nombre,
             html: `<!DOCTYPE html>
   <html lang="en" >
   <head>
     <meta charset="UTF-8">
-    <title>Chaos Championship Contacto</title>
+    <title>Chaos Series Contacto</title>
   </head>
   <body>
   <!-- partial:index.partial.html -->
