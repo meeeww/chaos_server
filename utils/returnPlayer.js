@@ -38,4 +38,31 @@ function returnPlayer(id, res) {
     });
 }
 
-module.exports = returnPlayer;
+async function returnPlayerList(id) {
+    let usuario = { info: {}, estadisticas: {} };
+
+    const sqlUser = "SELECT id_usuario, nombre_usuario, apellido_usuario, nick_usuario, icono, circuitotormenta, twitter, discord FROM usuarios WHERE id_usuario = ?";
+
+    try {
+        const result2 = await query(sqlUser, [id]);
+        usuario.info = result2[0];
+
+        return usuario;
+    } catch (error) {
+        throw error;
+    }
+}
+
+function query(sql, params) {
+    return new Promise((resolve, reject) => {
+        db.query(sql, params, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
+        });
+    });
+}
+
+module.exports = {returnPlayer, returnPlayerList, query};

@@ -7,7 +7,7 @@ const { admin, viewer, self } = require("../../middleware/roles");
 const db = require("../../middleware/db");
 
 //Importtamos utils
-const returnPlayer = require("../../utils/returnPlayer");
+const {returnPlayer, returnPlayerList, query} = require("../../utils/returnPlayer");
 
 // Set del router
 const router = express.Router();
@@ -16,7 +16,7 @@ const router = express.Router();
 // Set up the route handlers
 // *************************
 
-router.get("/", [auth, viewer], (req, res) => {
+router.get("/", (req, res) => {
     // /usuarios
     // recibimos todos los usuarios
 
@@ -28,6 +28,23 @@ router.get("/", [auth, viewer], (req, res) => {
             res.send({ status: 200, success: true, result: result });
         }
     });
+});
+
+router.get("/jugadores", async (req, res) => {
+    const sqlSelect = "SELECT id_usuario FROM usuarios WHERE rol = 1";
+    let listaJugadores = []
+
+    try {
+        const result = await query(sqlSelect);
+        for (const jugador of result) {
+            const playerInfo = await returnPlayerList(jugador["id_usuario"]);
+            listaJugadores.push(playerInfo);
+        }
+        res.send({ status: 200, success: true, result: listaJugadores });
+    } catch (err) {
+        console.log(err)
+        res.send({ status: 500, success: false, reason: "Problema con la base de datos.", error: err });
+    }
 });
 
 router.get("/id=:id", [auth, viewer], (req, res) => {
