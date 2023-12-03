@@ -32,20 +32,19 @@ router.get("/", (req, res) => {
 
 router.get("/jugadores", async (req, res) => {
     const sqlSelect = "SELECT id_usuario FROM usuarios WHERE rol = 1 AND nombre_usuario != 'NECESITA MODIFICACIÓN' AND apellido_usuario != 'NECESITA MODIFICACIÓN'";
-    let listaJugadores = []
 
     try {
         const result = await query(sqlSelect);
-        for (const jugador of result) {
-            const playerInfo = await returnPlayerList(jugador["id_usuario"]);
-            listaJugadores.push(playerInfo);
-        }
+        const promises = result.map(jugador => returnPlayerList(jugador.id_usuario));
+        const listaJugadores = await Promise.all(promises);
+
         res.send({ status: 200, success: true, result: listaJugadores });
     } catch (err) {
-        console.log(err)
+        console.log(err);
         res.send({ status: 500, success: false, reason: "Problema con la base de datos.", error: err });
     }
 });
+
 
 router.get("/id=:id", [auth, viewer], (req, res) => {
     // /usuarios/id=:id

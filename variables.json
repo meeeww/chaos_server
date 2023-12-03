@@ -1,5 +1,5 @@
 {
-    "directorio": "http://localhost:3000/",
+    "directorio": "https://api.chaosseries.com/",
     "main": "https://api.chaosseries.com/",
     "backup": "http://82.223.64.145:3000/",
     "local": "http://localhost:3000/"
