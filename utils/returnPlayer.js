@@ -39,13 +39,17 @@ function returnPlayer(id, res) {
 }
 
 async function returnPlayerList(id) {
-    let usuario = { info: {}, estadisticas: {} };
+    let usuario = { info: {}, cuentas: {}, estadisticas: {} };
 
     const sqlUser = "SELECT id_usuario, nombre_usuario, apellido_usuario, nick_usuario, icono, circuitotormenta, twitter, discord FROM usuarios WHERE id_usuario = ?";
+    const sqlCuentas = "SELECT invocador, tag, linea_principal, linea_secundaria FROM cuentas_lol WHERE id_usuario = ?";
 
     try {
         const result2 = await query(sqlUser, [id]);
         usuario.info = result2[0];
+
+        const result3 = await query(sqlCuentas, [id]);
+        usuario.cuentas = result3;
 
         return usuario;
     } catch (error) {

@@ -31,7 +31,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/jugadores", async (req, res) => {
-    const sqlSelect = "SELECT id_usuario FROM usuarios WHERE rol = 1";
+    const sqlSelect = "SELECT id_usuario FROM usuarios WHERE rol = 1 AND nombre_usuario != 'NECESITA MODIFICACIÓN' AND apellido_usuario != 'NECESITA MODIFICACIÓN'";
     let listaJugadores = []
 
     try {
