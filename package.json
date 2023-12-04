@@ -1,6 +1,6 @@
 {
   "name": "chaos-secure-api",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "description": "",
   "main": "server.js",
   "scripts": {
@@ -25,6 +25,7 @@
     "mysql": "^2.18.1",
     "nodemailer": "^6.9.7",
     "nodemon": "^3.0.1",
-    "serverless-http": "^3.2.0"
+    "serverless-http": "^3.2.0",
+    "swagger-ui-express": "^5.0.0"
   }
 }
