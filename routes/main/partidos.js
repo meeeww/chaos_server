@@ -9,7 +9,7 @@ const db = require("../../middleware/db");
 
 //Importtamos utils
 const returnPlayer = require("../../utils/returnPlayer");
-const {getPlayerStats} = require("../../utils/getPlayerStats");
+const { getPlayerStats } = require("../../utils/getPlayerStats");
 
 // Set del router
 const router = express.Router();

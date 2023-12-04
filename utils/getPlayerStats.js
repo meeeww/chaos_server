@@ -23,11 +23,26 @@ async function getPlayerStats(res, resultInfo) {
                 if (err) {
                   res.send({ status: 500, success: false, reason: "Problema con la base de datos.", error: err2 });
                 } else {
-                  console.log(result2);
                   if (result2.length == 0) {
-                    let chaosScore = 50;
                     let riotParticipantList = response.data["info"]["participants"];
-                    console.log(result[0]["id_usuario"]);
+                    let chaosScore =
+                      50 +
+                      parseInt(riotParticipantList[index]["challenges"]["soloKills"]) * 3 +
+                      parseInt(riotParticipantList[index]["challenges"]["pickKillWithAlly"]) * 2 +
+                      parseInt(riotParticipantList[index]["assists"]) * 0.5 +
+                      (parseInt(riotParticipantList[index]["challenges"]["dragonTakedowns"]) +
+                        parseInt(riotParticipantList[index]["challenges"]["riftHeraldTakedowns"]) +
+                        parseInt(riotParticipantList[index]["challenges"]["baronTakedowns"])) *
+                        0.5 +
+                      (parseInt(riotParticipantList[index]["challenges"]["turretTakedowns"]) + parseInt(riotParticipantList[index]["inhibitorTakedowns"])) *
+                        0.4 -
+                      parseInt(riotParticipantList[index]["deaths"]) * 3.5 -
+                      -((parseInt(riotParticipantList[index]["turretsLost"]) + parseInt(riotParticipantList[index]["inhibitorsLost"])) * 0.4);
+                    if (chaosScore > 100) {
+                      chaosScore = 100;
+                    } else if (chaosScore < 0) {
+                      chaosScore = 0;
+                    }
                     let sqlInsertUserStats =
                       "INSERT INTO `estadisticas_usuarios` (`id_usuario`, `kda`, `asesinatos`, `muertes`, `asistencias`, `kp`, `csmin`, `dmgmin`, `chaosscore`, `doublekills`, `triplekills`, `quadrakills`, `pentakills`, `objetivos_robados`, `torres_destruidas`, `inhibidores_destruidos`, `torretas_por_partido`, `inhibidores_por_partido`, `oro_partido`, `oromin`, `primera_torre`, `primera_sangre`, `vision_partido`, `wards`, `wards_destruidos`, `placas`, `pings`, `objetivos`, `objetivos_partido`, `wards_partido`, `wards_destruidos_partido`, `partidos_totales`, `victorias`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     db.query(
@@ -50,9 +65,9 @@ async function getPlayerStats(res, resultInfo) {
                         riotParticipantList[index]["pentaKills"],
                         riotParticipantList[index]["objectivesStolen"] + riotParticipantList[index]["objectivesStolenAssists"],
                         riotParticipantList[index]["challenges"]["turretTakedowns"],
-                        riotParticipantList[index]["inhibitorKills"] + riotParticipantList[index]["inhibitorTakedowns"],
+                        riotParticipantList[index]["inhibitorTakedowns"],
                         riotParticipantList[index]["challenges"]["turretTakedowns"],
-                        riotParticipantList[index]["inhibitorKills"] + riotParticipantList[index]["inhibitorTakedowns"],
+                        riotParticipantList[index]["inhibitorTakedowns"],
                         riotParticipantList[index]["challenges"]["goldPerMinute"].toFixed(2),
                         riotParticipantList[index]["challenges"]["goldPerMinute"].toFixed(2),
                         riotParticipantList[index]["challenges"]["firstTurretKilled"],
@@ -89,17 +104,60 @@ async function getPlayerStats(res, resultInfo) {
                       (err3, result3) => {
                         if (err3) {
                           res.send({ status: 500, success: false, reason: "Problema con la base de datos.", error: err3 });
-                        } else {
                         }
                       }
                     );
                   } else {
-                    //hay que modificar en caso de ya exista el usuario
+                    let riotParticipantList = response.data["info"]["participants"];
+                    // Obtén el id_usuario
+                    const idUsuario = result[0]["id_usuario"];
+
+                    // Consulta para obtener estadísticas anteriores
+                    let sqlSelectUserStats = "SELECT * FROM estadisticas_usuarios WHERE id_usuario = ?";
+                    db.query(sqlSelectUserStats, [idUsuario], (err2, result2) => {
+                      if (err2) {
+                        res.send({ status: 500, success: false, reason: "Problema con la base de datos.", error: err2 });
+                      } else {
+                        if (result2.length > 0) {
+                          // Estadísticas anteriores encontradas, realiza la suma
+                          let existingStats = result2[0];
+
+                          // Realiza la suma con los nuevos valores
+                          existingStats.kda += ((parseFloat(riotParticipantList[index]["kills"]) + parseFloat(riotParticipantList[index]["assists"])) / parseFloat(riotParticipantList[index]["deaths"])).toFixed(2);
+                          existingStats.asesinatos += riotParticipantList[index]["kills"];
+                          existingStats.muertes += riotParticipantList[index]["deaths"];
+                          existingStats.asistencias += riotParticipantList[index]["assists"];
+                          // ... (realiza la suma para los demás campos)
+
+                          // Actualiza la fila en la tabla con las nuevas estadísticas
+                          let sqlUpdateUserStats = "UPDATE estadisticas_usuarios SET kda=?, asesinatos=?, muertes=?, asistencias=? WHERE id_usuario=?";
+                          db.query(
+                            sqlUpdateUserStats,
+                            [
+                              existingStats.kda,
+                              existingStats.asesinatos,
+                              existingStats.muertes,
+                              existingStats.asistencias,
+                              // ... (agrega los demás campos)
+                              idUsuario,
+                            ],
+                            (err3, result3) => {
+                              if (err3) {
+                                res.send({ status: 500, success: false, reason: "Problema con la base de datos.", error: err3 });
+                              }
+                            }
+                          );
+                        } else {
+                          // No hay estadísticas anteriores, realiza la inserción como se hace actualmente
+                          // ... (código de inserción actual)
+                        }
+                      }
+                    });
                   }
                 }
               });
-              console.log(result[0]["id_usuario"]);
-              console.log(index);
+              // console.log(result[0]["id_usuario"]);
+              // console.log(index);
             }
           }
         });
