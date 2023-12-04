@@ -79,7 +79,7 @@ router.get("/usuarios/id=:id", [auth, viewer], (req, res) => {
     // recibimos todos los usuarios dentro de un equipo a partir de su id
     const id = req.params.id;
 
-    const sqlSelect = "SELECT * FROM usuarios WHERE id_equipo = ?";
+    const sqlSelect = "SELECT id_usuario, id_equipo, id_discord, nombre_usuario, apellido_usuario, nick_usuario, edad, rol, icono, usuario_activado, circuitotormenta, twitter, discord FROM usuarios WHERE id_equipo = ?";
     db.query(sqlSelect, [id], (err, result) => {
         if (err) {
             res.send({ status: 500, success: false, reason: "Problema con la base de datos.", error: err });
