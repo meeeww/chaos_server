@@ -5,6 +5,7 @@ const axios = require("axios");
 // Importamos middlewares
 const auth = require("../../middleware/auth");
 const { admin, viewer, self } = require("../../middleware/roles");
+const riotApiHelper = require("../../middleware/riotApiHelper");
 const db = require("../../middleware/db");
 
 // Set del router
