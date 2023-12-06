@@ -66,15 +66,30 @@ router.post("/", [auth, self], async (req, res) => {
     lineaprincipal = req.body.linea_principal;
     lineasecundaria = req.body.linea_secundaria;
 
-    const sql =
+    if (riotApiHelper.checkUserEuw){
+
+        const sql =
         "INSERT INTO `cuentas_lol` (`id_cuenta`, `id_usuario`, `id_juego`, `invocador`, `tag`, `puuid_lol`, `linea_principal`, `linea_secundaria`) VALUES (NULL, ?, 1, ?, ?, ?, ?, ?)";
-    db.query(sql, [idusuario, invocador, tag, puuid, lineaprincipal, lineasecundaria], (err, result) => {
+
+        db.query(sql, [idusuario, invocador, tag, puuid, lineaprincipal, lineasecundaria], (err, result) => {
+
         if (err) {
+
             res.send({ status: 500, success: false, reason: "Problema con la base de datos.", error: err });
+
         } else {
+
             res.send({ status: 200, success: true, result: result });
+            
         }
-    });
+        });
+
+    }else{
+
+        res.send({ status: 400, success: false, reason: "Summoner no pertenece a euw.", error: err });
+
+    }
+    
 });
 
 router.put("/", [auth, self], async (req, res) => {
