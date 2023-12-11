@@ -178,6 +178,38 @@ router.put("/", [auth, self], async (req, res) => {
   });
 });
 
+router.put("/masa/roles", [auth, admin], async (req, res) => {
+  // /modificarusuario
+  // modificamos un usuario
+  id_usuario = req.body.id_usuario;
+  valor = req.body.valor;
+
+  const sql = "UPDATE usuarios SET rol = ? WHERE id_usuario IN(?)";
+  db.query(sql, [valor, id_usuario], (err, result) => {
+    if (err) {
+      res.send({ status: 500, success: false, reason: "Problema con la base de datos.", error: err });
+    } else {
+      res.send({ status: 200, success: true, result: result });
+    }
+  });
+});
+
+router.put("/masa/equipos", [auth, admin], async (req, res) => {
+  // /modificarusuario
+  // modificamos un usuario
+  id_usuario = req.body.id_usuario;
+  valor = req.body.valor;
+
+  const sql = "UPDATE usuarios SET id_equipo = ? WHERE id_usuario IN(?)";
+  db.query(sql, [valor, id_usuario], (err, result) => {
+    if (err) {
+      res.send({ status: 500, success: false, reason: "Problema con la base de datos.", error: err });
+    } else {
+      res.send({ status: 200, success: true, result: result });
+    }
+  });
+});
+
 router.put("/icono", [auth, admin], async (req, res) => {
   // /usuario/icono
   // cambiamos icono de un usuario a partir de su id

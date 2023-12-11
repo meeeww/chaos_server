@@ -6,6 +6,10 @@ const db = mysql.createPool({
     user: "chao_chaossuperadmin",
     password: "kcuuDPIR@*NUWK7h",
     database: "chao_chaos",
+    // host: "161.97.162.29",
+    // user: "chao_chaos",
+    // password: "F-7HMvNMF+B^mv@f",
+    // database: "chao_chaoss",
 });
 
 module.exports = db;
